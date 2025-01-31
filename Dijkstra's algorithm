@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+#include <limits.h>
+using namespace std;
+
+const int INF = INT_MAX;
+int findMinDistance(vector<int>& dist, vector<bool>& visited, int V) {
+    int minDistance = INF, minIndex;
+
+    for (int v = 0; v < V; v++) {
+        if (!visited[v] && dist[v] <= minDistance) {
+            minDistance = dist[v];
+            minIndex = v;
+        }
+    }
+    return minIndex;
+}
+
+void dijkstra(vector<vector<int>>& graph, int src, int dest, int V) {
+    vector<int> dist(V, INF);
+    vector<bool> visited(V, false);
+    vector<int> parent(V, -1); // To store the path
+
+    dist[src] = 0;
+
+    for (int count = 0; count < V - 1; count++) {
+        int u = findMinDistance(dist, visited, V);
+        visited[u] = true;
+
+        for (int v = 0; v < V; v++) {
+            if (!visited[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+                parent[v] = u;
+            }
+        }
+    }
+
+    cout << "Shortest path cost from " << src << " to " << dest << ": " << dist[dest] << endl;
+
+    // Construct the path in the correct order
+    vector<int> path;
+    int current = dest;
+    while (current != -1) {
+        path.push_back(current);
+        current = parent[current];
+    }
+
+    // Print the path in the correct order
+    cout << "Path: ";
+    for (int i = path.size() - 1; i >= 0; i--) {
+        cout << path[i] << " ";
+    }
+    cout << endl;
+}
+
+int main() {
+    int V;
+    cout << "Enter the number of vertices: ";
+    cin >> V;
+
+    vector<vector<int>> graph(V, vector<int>(V));
+
+    cout << "Enter the adjacency matrix (use 0 for no connection):\n";
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            cin >> graph[i][j];
+        }
+    }
+
+    int src, dest;
+    cout << "Enter the starting node: ";
+    cin >> src;
+    cout << "Enter the destination node: ";
+    cin >> dest;
+
+    dijkstra(graph, src, dest, V);
+
+    return 0;
+}
