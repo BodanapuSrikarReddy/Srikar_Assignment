@@ -1,0 +1,66 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+struct Node {
+    char ch;
+    int freq;
+    Node *left, *right;
+    
+    Node(char character, int frequency) {
+        ch = character;
+        freq = frequency;
+        left = right = nullptr;
+    }
+};
+
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        return a->freq > b->freq;
+    }
+};
+
+Node* buildHuffmanTree(string S, vector<int>& f) {
+    priority_queue<Node*, vector<Node*>, Compare> pq;
+    
+    for (size_t i = 0; i < S.size(); i++) {
+        pq.push(new Node(S[i], f[i]));
+    }
+    
+    while (pq.size() > 1) {
+        Node* left = pq.top(); pq.pop();
+        Node* right = pq.top(); pq.pop();
+        
+        Node* merged = new Node('\0', left->freq + right->freq);
+        merged->left = left;
+        merged->right = right;
+        
+        pq.push(merged);
+    }
+    
+    return pq.top();
+}
+
+
+void printPreorder(Node* root, string code) {
+    if (!root) return;
+    
+    if (root->ch != '\0') {
+        cout << code << " ";
+    }
+    
+    printPreorder(root->left, code + "0");
+    printPreorder(root->right, code + "1");
+}
+
+int main() {
+    string S = "abcdef";
+    vector<int> f = {5, 9, 12, 13, 16, 45};
+    
+    Node* root = buildHuffmanTree(S, f);
+    printPreorder(root, "");
+    
+    return 0;
+}
