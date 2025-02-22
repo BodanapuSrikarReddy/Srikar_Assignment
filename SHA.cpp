@@ -1,0 +1,45 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <openssl/evp.h>  
+
+using namespace std;
+
+string sha256File(const string& filename) {
+    ifstream file(filename, ios::binary);
+    if (!file) {
+        cerr << "Error opening file: " << filename << endl;
+        exit(1);
+    }
+
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();  
+    const EVP_MD* md = EVP_sha256();     
+    EVP_DigestInit_ex(ctx, md, nullptr); 
+
+    char buffer[4096]; 
+    while (file.read(buffer, sizeof(buffer)) || file.gcount()) {
+        EVP_DigestUpdate(ctx, buffer, file.gcount());
+    }
+
+    unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int hashLen;
+    EVP_DigestFinal_ex(ctx, hash, &hashLen); 
+    EVP_MD_CTX_free(ctx); 
+
+    stringstream ss;
+    for (unsigned int i = 0; i < hashLen; i++) {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
+
+int main() {
+    string filename;
+    cout << "Enter the file path: ";
+    getline(cin, filename);
+
+    string hashValue = sha256File(filename);
+    cout << "SHA-256 Hash of the file: " << hashValue << endl;
+    return 0;
+}
